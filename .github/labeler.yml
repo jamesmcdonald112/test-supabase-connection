@@ -1,0 +1,9 @@
+# Auto-label by file path
+frontend:
+  - frontend/**
+backend:
+  - backend/**
+dependencies:
+  - "**/package-lock.json"
+  - "**/build.gradle"
+  - "**/pom.xml"

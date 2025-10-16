@@ -1,0 +1,21 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "streetsidesoftware.code-spell-checker",
+    "ms-vscode.vscode-typescript-next",
+    "redhat.java",
+    "vscjava.vscode-spring-initializr",
+    "vscjava.vscode-spring-boot-dashboard",
+    "vscjava.vscode-java-test",
+    "mhutchie.git-graph",
+    "eamodio.gitlens",
+    "foxundermoon.shell-format",
+    "mikestead.dotenv",
+    "humao.rest-client"
+  ],
+  "unwantedRecommendations": [
+    "hookyqr.beautify",
+    "ms-vscode.cpptools"
+  ]
+}

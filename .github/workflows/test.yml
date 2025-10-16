@@ -1,0 +1,97 @@
+name: CI - Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  frontend-tests:
+    name: Run Frontend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  backend-tests:
+    name: Run Backend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      # 💨 Cache Gradle dependencies
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
+      - name: Run Gradle tests (no daemon)
+        run: ./gradlew test --no-daemon
+
+      - name: Generate JaCoCo coverage report
+        run: ./gradlew jacocoTestReport --no-daemon
+
+      - name: Upload JaCoCo HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-report
+          path: build/reports/jacoco/test/html
+
+      # 🧮 Compute coverage percentage
+      - name: Compute coverage %
+        id: cov
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET, os
+          t = ET.parse('build/reports/jacoco/test/jacocoTestReport.xml').getroot()
+          covered = missed = 0
+          for c in t.iter('counter'):
+              if c.get('type') == 'INSTRUCTION':
+                  covered += int(c.get('covered'))
+                  missed  += int(c.get('missed'))
+          pct = 0 if covered+missed == 0 else round(100*covered/(covered+missed), 2)
+          print(pct)
+          open(os.environ['GITHUB_OUTPUT'], 'w').write(f"pct={pct}")
+          PY
+
+      # 🧾 Post coverage % to PR summary
+      - name: Post coverage to PR summary
+        run: |
+          echo "## Backend coverage: ${{ steps.cov.outputs.pct }}% ✅" >> $GITHUB_STEP_SUMMARY

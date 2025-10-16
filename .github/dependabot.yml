@@ -1,0 +1,60 @@
+version: 2
+updates:
+  # 🧠 Frontend — npm packages
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Dublin"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "frontend"
+    reviewers:
+      - "jamesmcdonald112"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+        labels:
+          - "dependencies"
+          - "minor-update"
+      major:
+        update-types: ["major"]
+        labels:
+          - "dependencies"
+          - "⚠️ major-update"
+    ignore:
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+
+  # ⚙️ Backend — Gradle dependencies
+  - package-ecosystem: "gradle"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Dublin"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "backend"
+    reviewers:
+      - "jamesmcdonald112"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+        labels:
+          - "dependencies"
+          - "minor-update"
+      major:
+        update-types: ["major"]
+        labels:
+          - "dependencies"
+          - "⚠️ major-update"

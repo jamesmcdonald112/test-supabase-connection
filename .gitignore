@@ -1,0 +1,19 @@
+# macOS / IDE
+.DS_Store
+.idea
+.vscode
+.gradle/
+build/
+out/
+
+# environment
+.env
+
+# database
+data/
+
+# docker
+*.log
+
+# system
+node_modules/

@@ -1,0 +1,85 @@
+# =============================
+# 🧱 SPRING REACT VITE TEMPLATE
+# =============================
+# Multi-environment Docker Compose setup:
+# - dev       → Local H2 (no DB container)
+# - supabase  → Cloud-hosted PostgreSQL
+# - prod      → Local Docker PostgreSQL
+#
+# To switch, set SPRING_PROFILES_ACTIVE in your .env file
+
+services:
+  # =============================
+  # 🐘 PostgreSQL Database (Prod Profile)
+  # =============================
+  # Only used when SPRING_PROFILES_ACTIVE=prod
+  db:
+    image: postgres:16
+    container_name: ${COMPOSE_PROJECT_NAME}-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================
+  # ☕ Spring Boot Backend
+  # =============================
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.backend
+    container_name: ${COMPOSE_PROJECT_NAME}-backend
+    restart: always
+    ports:
+      - "8080:8080"
+
+    # Wait for DB before starting (for prod profile only)
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+      # 🌱 Choose the profile (dev / supabase / prod)
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+
+      # =============================
+      # 🧱 dev — Local H2
+      # =============================
+      # Uses ./data/devdb — no extra variables required
+
+      # =============================
+      # 🟢 supabase — Cloud Postgres
+      # =============================
+      SUPABASE_JDBC_URL: ${SUPABASE_JDBC_URL}
+      SUPABASE_USERNAME: ${SUPABASE_USERNAME}
+      SUPABASE_PASSWORD: ${SUPABASE_PASSWORD}
+
+      # =============================
+      # 🐳 prod — Docker Postgres
+      # =============================
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-appdb}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-password}
+
+      # Optional tuning / Hibernate settings
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  db_data:

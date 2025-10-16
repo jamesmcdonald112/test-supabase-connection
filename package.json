@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "zod": "^4.1.12"
+  },
+  "name": "spring-react-vite-template",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:backend": "cd backend && ./gradlew bootRun",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesmcdonald112/spring-react-vite-template.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jamesmcdonald112/spring-react-vite-template/issues"
+  },
+  "homepage": "https://github.com/jamesmcdonald112/spring-react-vite-template#readme",
+  "description": ""
+}
